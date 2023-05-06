@@ -1,3 +1,4 @@
+const express = require("express");
 const puppeteer = require("puppeteer");
 
 async function takeScreenshot(url) {
@@ -19,21 +20,22 @@ async function takeScreenshot(url) {
   return screenshot;
 }
 
-// Cloud Runのエンドポイント
-exports.screenshotHandler = async (req, res) => {
-  const { url } = req.query;
+const app = express();
+const port = process.env.PORT || 8080;
 
-  if (!url) {
-    res.status(400).send("URL parameter is missing.");
-    return;
-  }
-
+app.get("/", async (req, res) => {
   try {
-    const screenshot = await takeScreenshot(url);
-    res.set("Content-Type", "image/png");
+    const screenshot = await takeScreenshot(
+      "https://template-i5kot4zjma-an.a.run.app/"
+    );
+    res.status(200).set("Content-Type", "image/png");
     res.send(screenshot);
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred while taking the screenshot.");
   }
-};
+});
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
